@@ -19,7 +19,31 @@ eval:
   seed: 42
   temperature: 0.0
 
-targets:
+# Realistic ranges (from HANDOFF §7). Eval report compares baseline vs
+# expected (realistic) vs stretch (ambitious) vs target (gate).
+expected:
+  parseable: 0.995
+  valid_name: 0.995
+  expected_name: 0.950
+  exact_args: 0.780
+  arg_key_overlap: 0.930
+  stopped_cleanly: 0.950
+  recovery: 0.750
+  multiturn: 0.550
+  pas: 0.820
+
+stretch:
+  parseable: 1.000
+  valid_name: 1.000
+  expected_name: 0.970
+  exact_args: 0.850
+  arg_key_overlap: 0.960
+  stopped_cleanly: 0.980
+  recovery: 0.850
+  multiturn: 0.700
+  pas: 0.880
+
+targets:  # hard gate to claim a "beat"
   parseable: 0.995
   valid_name: 0.995
   expected_name: 0.960

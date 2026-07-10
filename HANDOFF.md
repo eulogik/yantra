@@ -90,6 +90,14 @@ Baseline PAS ~= 0.56 (corrected: (0.993+0.97+0.927+0.653+0.752+0.15+0+0)/8).
 
 Verdict: clearly MORE USABLE than baseline (parser-free, self-stopping, error-recovering, same ~688MB Q4). Still a 1B model — will not rival 7B-70B on hard generalization/long planning. biggest risks: exact_args (needs strong verifier), router wrong-bind. Paper: solid arXiv/workshop, incremental not breakthrough.
 
+## 8. Environment note (2026-07-10)
+
+- This dev box is NOT the target Mac Mini M4 16GB. All training/eval MUST run on the M4.
+- Setup script `scripts/setup_mac.sh` builds a `.venv` (gitignored) with: datasets, huggingface_hub, openai, sentence-transformers, mlx, mlx-lm, llama-cpp-python.
+- **Use Python 3.11** for the venv. Python 3.14 (default `python3` here) has no ML wheels and pip hangs building from source. `python3.11` is at `~/.local/bin/python3.11`.
+- Baseline reproduction needs: (a) the 300-case eval set (`eval/build_eval_set.py`, uses `datasets` or huggingface_hub), (b) the Q4_K_M GGUF (~688MB) served via `llama.cpp`/`llama-cpp-python`, (c) `eval/serve_and_eval.sh` + `eval/first_call_eval.py`.
+- Training (Stages 1-4) uses `train/mlx_sft.py` (mlx-lm LoRA) on the M4.
+
 ## 4. How to run (current state)
 
 ```bash
