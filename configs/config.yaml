@@ -1,0 +1,37 @@
+base_model: openbmb/MiniCPM5-1B
+project: nanogent
+
+training:
+  method: qlora
+  lora_r: 64
+  lora_alpha: 128
+  lora_dropout: 0.05
+  max_seq_len: 8192
+  stage1_sft_steps: 2000
+  stage2_eg_opd_steps: 3000
+  stage3_rte_steps: 1500
+  learning_rate: 1.0e-4
+  eg_opd_k: 50
+
+eval:
+  eval_set: eval/data/toolace_300.jsonl
+  n_cases: 300
+  seed: 42
+  temperature: 0.0
+
+targets:
+  parseable: 0.995
+  valid_name: 0.995
+  expected_name: 0.960
+  exact_args: 0.850
+  arg_key_overlap: 0.950
+  stopped_cleanly: 0.950
+  recovery: 0.800
+  multiturn: 0.700
+  pas: 0.880
+
+publish:
+  hf_org: eulogik
+  hf_private: true
+  gh_org: eulogik
+  gh_private: true
