@@ -39,3 +39,8 @@ dist/
 .DS_Store
 *.log
 wandb/
+
+# ============ Notebook run artifacts ============
+yantra_run/
+_test_*.ipynb
+.ipynb_checkpoints/
