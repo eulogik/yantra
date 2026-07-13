@@ -56,6 +56,24 @@
 - **Improvement #4 (multi-turn loop):** added `runtime/lm_server.YantraRuntime.run_turn(query, tools, max_turns=3)`. On reward < 1.0 it appends `<tool_error>{info}</tool_error>\n<reflect/>\n` and re-calls `act` (bind only on turn 0), matching the RTE training format. `parse_dtsa` now parses the *last* complete block so recovery reads the corrected call.
 - **Still TODO (not done this session, needs the M4):** Stages 1-4 training loops, baseline reproduction, real executable verifier registry (the #1 accuracy lever — see §3).
 
+### 2026-07-13 (session 3) — unblocked baseline reproduction
+- **CRITICAL DATA BUG FIXED:** the data scripts assumed an old ToolACE export
+  (`queries`/`tools`/`answers`) that does NOT match the live `Team-ACE/ToolACE`
+  dataset (ShareGPT `conversations` + tool JSONSchema embedded in `system`).
+  `build_eval_set.py` produced **0 cases**. Added `data/toolace_conversations.py`
+  (robust extractor: 7822 parseable / 4382 single-call of 11300) and wired it
+  into `eval/build_eval_set.py` (legacy fallback kept). The 300-case set now
+  builds deterministically (pool=4382).
+- **BASELINE REPO NAME CORRECTED:** `ewinregirgojr/MiniCPM5-1B-Agentic-Tooluse-Nemotron-DPO.Q4_K_M`
+  (as written in §1/§3) is a 404. The real public repo is
+  `ewinregirgojr/MiniCPM5-1B-Agentic-Tooluse-GGUF` and the GGUF is the *file*
+  `MiniCPM5-1B-Agentic-Tooluse-Nemotron-DPO.Q4_K_M.gguf` (also Q8_0 / F16).
+- **NOTE on eval fairness:** legacy eval sends a custom `<user>/<tools>/<calls>`
+  prompt via the OpenAI `messages` API; llama.cpp applies the GGUF's embedded
+  chat template. Our "baseline PAS" is therefore *our measured baseline on this
+  eval*, which is the right reference for a system-vs-system beat (not a
+  verbatim reproduction of the card's numbers).
+
 **Next action (blocked on hardware):** Step 1 baseline reproduction on the MacBook Air M4. See §9 for the machine-time ask.
 
 ---
