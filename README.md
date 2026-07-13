@@ -1,4 +1,4 @@
-# NanoAgent
+# Yantra
 
 A practical sub/same-size agentic model that **beats `ewinregirgojr/MiniCPM5-1B-Agentic-Tooluse-GGUF`** on the weak points that model exhibits in real deployment:
 
@@ -12,14 +12,14 @@ See `implementation-doc.md` (one level up) for the full method, and `HANDOFF.md`
 ## Quick start (reproduce baseline first)
 
 ```bash
-cd nanogent
+cd yantra
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 # 1) Build the fixed 300-case ToolACE eval set (deterministic)
 python eval/build_eval_set.py --out eval/data/toolace_300.jsonl --n 300 --seed 42
 
-# 2) Serve the baseline model (or NanoAgent once trained), then evaluate
+# 2) Serve the baseline model (or Yantra once trained), then evaluate
 python eval/first_call_eval.py \
   --eval-set eval/data/toolace_300.jsonl \
   --base-url http://localhost:8000/v1 \

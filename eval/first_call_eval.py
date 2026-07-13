@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """First-call evaluator — reproduces the community baseline's 300-case metrics
-and measures NanoAgent against them.
+and measures Yantra against them.
 
 Metrics (identical definitions to the source model card):
   parseable        : one complete call block extracted
@@ -16,9 +16,9 @@ Usage:
   python first_call_eval.py --eval-set eval/data/toolace_300.jsonl \
       --base-url http://localhost:8000/v1 --model <baseline> --mode legacy
 
-  # NanoAgent (DTSA, optional router pre-bind):
+  # Yantra (DTSA, optional router pre-bind):
   python first_call_eval.py --eval-set eval/data/toolace_300.jsonl \
-      --base-url http://localhost:8000/v1 --model nanogent-1b --mode dtsa
+      --base-url http://localhost:8000/v1 --model yantra-1b --mode dtsa
 
   # no model/server available (pipeline self-test):
   python first_call_eval.py --eval-set eval/data/toolace_300.jsonl --mock
@@ -45,18 +45,22 @@ def _unescape(v: str) -> str:
 
 
 def parse_dtsa(text: str):
-    m = DTSA_BIND.search(text)
-    if not m:
+    # Target the LAST complete call block (so multi-turn / recovery traces parse
+    # the corrected call, not the earlier failed one). For single-call outputs
+    # the last block is the only block, so eval behavior is unchanged.
+    binds = list(DTSA_BIND.finditer(text))
+    if not binds:
         return None
-    tool = m.group(1)
-    am = DTSA_ARGS.search(text)
+    last_bind = binds[-1]
+    tool = last_bind.group(1)
+    am = DTSA_ARGS.search(text[last_bind.end():])
     args = {}
     if am:
         for pm in DTSA_PARAM.finditer(am.group(1)):
             args[pm.group(1)] = _unescape(pm.group(2).strip())
-    stopped = bool(re.search(r"<action_end/>\s*$", text.strip()))
-    tail = text[text.rfind("<action_end/>") + len("<action_end/>"):].strip()
-    return {"tool": tool, "args": args, "stopped_clean": stopped and tail == ""}
+    ends = list(re.finditer(r"<action_end/>", text))
+    stopped_clean = bool(ends) and text[ends[-1].end():].strip() == ""
+    return {"tool": tool, "args": args, "stopped_clean": stopped_clean}
 
 
 def parse_legacy(text: str):

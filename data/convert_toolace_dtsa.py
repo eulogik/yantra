@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert Team-ACE/ToolACE examples into NanoAgent DTSA training format.
+"""Convert Team-ACE/ToolACE examples into Yantra DTSA training format.
 
 DTSA (Decoupled Tool Selection / Argument generation) format:
 

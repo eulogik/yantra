@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup_mac.sh — install everything needed to train + eval NanoAgent on Apple Silicon (M4 16GB).
+# setup_mac.sh — install everything needed to train + eval Yantra on Apple Silicon (M4 16GB).
 set -e
 cd "$(dirname "$0")/.."   # repo root
 PIP="python3 -m pip"

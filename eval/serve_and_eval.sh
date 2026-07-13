@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# serve_and_eval.sh — serve a GGUF (baseline or NanoAgent) and run the 300-case evaluator.
+# serve_and_eval.sh — serve a GGUF (baseline or Yantra) and run the 300-case evaluator.
 # Auto-detects server backend: llama-server (llama.cpp CLI) else python -m llama_cpp.server.
 set -e
 MODEL="${1:?usage: serve_and_eval.sh <model.gguf|hf_id> [port] [eval-set] [mode]}"
@@ -13,9 +13,9 @@ if command -v llama-server >/dev/null 2>&1; then
 else
   SERVER=(python3 -m llama_cpp.server --model "$MODEL" --port "$PORT")
 fi
-"${SERVER[@]}" > /tmp/nanogent_server.log 2>&1 &
+"${SERVER[@]}" > /tmp/yantra_server.log 2>&1 &
 SRV_PID=$!
-echo "   server pid=$SRV_PID (log: /tmp/nanogent_server.log)"
+echo "   server pid=$SRV_PID (log: /tmp/yantra_server.log)"
 
 # wait for health
 for i in $(seq 1 60); do

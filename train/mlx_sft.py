@@ -8,6 +8,9 @@ Usage:
   python3 train/mlx_sft.py --data data/toolace.dtsa.jsonl \
       --base openbmb/MiniCPM5-1B --out train/outputs/sft-dtsa --iters 2000
 """
+
+# Project name constant (kept in sync with configs/config.yaml).
+PROJECT = "yantra"
 from __future__ import annotations
 
 import argparse

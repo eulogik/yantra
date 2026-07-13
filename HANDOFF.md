@@ -1,4 +1,4 @@
-# NanoAgent — HANDOFF / LIVING DOC
+# Yantra — HANDOFF / LIVING DOC
 
 > Single source of truth for plan + progress. Update this file at the end of
 > every work session. Keep the "Status" table honest: red / amber / green.
@@ -16,10 +16,10 @@
 | Repo scaffold + gitignore + secured creds | ✅ done | `credentials.env` gitignored; never commit |
 | Data pipeline (convert / eval-set / rte / holdout) | ✅ done | runs; needs HF network for full ToolACE |
 | 300-case evaluator + PAS | ✅ done | verified in `--mock` mode |
-| Runtime (router / verifier / boundary / lm_server) | 🟡 partial | modules written, not run against a live server |
+| Runtime (router / verifier / boundary / lm_server) | 🟢 mostly done | router/verifier/boundary(logprob)/lm_server + run_turn written; not run live |
 | Training stages (sft/eg-opd/rte/boundary/router/distill) | 🟡 stubs | real loss fn + argparsers; GPU loops TODO |
 | Reproduce baseline numbers | ⛔ blocked | needs GPU + model download (see §3) |
-| Train NanoAgent-1B | ⛔ blocked | depends on GPU + baseline repro |
+| Train Yantra-1B | ⛔ blocked | depends on GPU + baseline repro |
 | Publish (HF private / GH private) | ⛔ not started | creds ready in `credentials.env` |
 
 ---
@@ -31,7 +31,7 @@
 3. **Stage 2 EG-OPD** — wire `runtime/verifier.ToolVerifier` into the loss (`train/eg_opd.eg_opd_loss`). Teacher = local Qwen2.5-7B or OpenRouter free model (zero balance → free only).
 4. **Stage 3 RTE SFT** on `data/rte.jsonl`.
 5. **Stage 4 boundary head** train + plug into `runtime/boundary_decoder.should_stop`.
-6. **Eval NanoAgent** on 300-case + generalization + recovery + multi-turn → compute PAS. Must clear §targets.
+6. **Eval Yantra** on 300-case + generalization + recovery + multi-turn → compute PAS. Must clear §targets.
 7. **Quantize** to F16/Q8/Q4_K_M; re-eval (Q4 delta ≤2pt).
 8. **(stretch) Sub-1B** distill → `train/distill_sub1b.py`.
 9. **Publish** HF (private, org `eulogik`) + GH (private, org `eulogik`). No public until explicit go-ahead.
@@ -41,14 +41,22 @@
 ## 2. Progress log
 
 ### 2026-07-10 (session 1)
-- Created `nanogent/` repo: README, .gitignore, `credentials.env` (gitignored).
+- Created `yantra/` repo: README, .gitignore, `credentials.env` (gitignored).
 - Data pipeline: `convert_toolace_dtsa.py`, `build_eval_set.py`, `build_rte_corpus.py`, `holdout_split.py`.
 - Eval: `first_call_eval.py` (legacy+DTSA parser, value-normalized exact_args) + `pas.py`. Verified end-to-end in `--mock` mode on a 2-case set → PAS computes correctly.
-- Runtime: `router.py` (BM25 fallback + sentence-transformers), `verifier.py` (schema + mock exec → reward), `boundary_decoder.py` (STSA stop logic), `lm_server.py` (NanoAgentRuntime).
+- Runtime: `router.py` (BM25 fallback + sentence-transformers), `verifier.py` (schema + mock exec → reward), `boundary_decoder.py` (STSA stop logic), `lm_server.py` (YantraRuntime).
 - Training: `sft_dtsa.py` (build_messages), `eg_opd.py` (real `eg_opd_loss`), `rte_sft.py`, `boundary_head.py`, `router_train.py`, `distill_sub1b.py` — all with argparsers + TODO loops.
 - Config: `configs/config.yaml`. Requirements: `requirements.txt`.
 
-**Next action:** obtain GPU + download baseline model to run Step 1 (reproduce baseline).
+ **Next action:** obtain GPU + download baseline model to run Step 1 (reproduce baseline).
+
+### 2026-07-13 (session 2) — rename + runtime improvements
+- **Renamed project `nanogent`/`NanoAgent` → `yantra`/`Yantra`** across README, HANDOFF, configs, scripts, eval, train, runtime docstrings. Repo dir + HF/GH orgs stay `eulogik` until a real rename is decided.
+- **Improvement #2 (logprob boundary):** replaced the hidden-state "boundary head" (`train/boundary_head.py`) with a direct end-token logprob check. `runtime/boundary_decoder.end_token_prob` reads P(`<action_end/>`) from the streaming completion's `top_logprobs` and `should_stop` stops when it exceeds `tau`. Works with llama.cpp/vLLM (no exposed hidden states). `train/boundary_head.py` is now superseded — keep only if a custom PyTorch serve path is added later.
+- **Improvement #4 (multi-turn loop):** added `runtime/lm_server.YantraRuntime.run_turn(query, tools, max_turns=3)`. On reward < 1.0 it appends `<tool_error>{info}</tool_error>\n<reflect/>\n` and re-calls `act` (bind only on turn 0), matching the RTE training format. `parse_dtsa` now parses the *last* complete block so recovery reads the corrected call.
+- **Still TODO (not done this session, needs the M4):** Stages 1-4 training loops, baseline reproduction, real executable verifier registry (the #1 accuracy lever — see §3).
+
+**Next action (blocked on hardware):** Step 1 baseline reproduction on the MacBook Air M4. See §9 for the machine-time ask.
 
 ---
 
@@ -98,10 +106,26 @@ Verdict: clearly MORE USABLE than baseline (parser-free, self-stopping, error-re
 - Baseline reproduction needs: (a) the 300-case eval set (`eval/build_eval_set.py`, uses `datasets` or huggingface_hub), (b) the Q4_K_M GGUF (~688MB) served via `llama.cpp`/`llama-cpp-python`, (c) `eval/serve_and_eval.sh` + `eval/first_call_eval.py`.
 - Training (Stages 1-4) uses `train/mlx_sft.py` (mlx-lm LoRA) on the M4.
 
+ ## 9. Machine-time ask (MacBook Air M4)
+Training + baseline reproduction are the ONLY phases that need the whole
+machine. Everything else (data, eval harness, runtime, this session's edits)
+runs on CPU / is offline-safe.
+
+- **Baseline reproduction (gate):** build 300-set (one-time HF net, ~min) + download Q4_K_M GGUF (~688MB) + serve + eval → **~15-30 min**, but needs network + free RAM.
+- **Stage 1 DTSA SFT (mlx-lm LoRA):** **~3-6 h** of sustained M4 load.
+- **Stage 2 EG-OPD self-distill:** **~2-4 h**.
+- **Stage 3 RTE SFT + Stage 4 boundary (now logprob, no train):** **~1-2 h**.
+- **Full pipeline wall-clock:** **~1-2 days**, with the M4 mostly dedicated.
+
+>>> Before kicking off Stages 1-4, the operator must approve: pause other
+>>> tasks, keep the machine on power + awake, expect fans/heat. Ask for the go.
+
+---
+
 ## 4. How to run (current state)
 
 ```bash
-cd nanogent
+cd yantra
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 

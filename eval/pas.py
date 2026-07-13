@@ -8,7 +8,7 @@ own numbers, with recovery/multi-turn = 0 because the baseline has neither):
   arg_overlap 0.7517 | stopped 0.1500 | recovery 0 | multiturn 0
   => baseline PAS ~= 0.63
 
-NanoAgent target PAS >= 0.88.
+Yantra target PAS >= 0.88.
 """
 from __future__ import annotations
 

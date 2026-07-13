@@ -1,5 +1,5 @@
 base_model: openbmb/MiniCPM5-1B
-project: nanogent
+project: yantra
 
 training:
   method: qlora
