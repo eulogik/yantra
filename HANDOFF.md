@@ -18,7 +18,7 @@
 | 300-case evaluator + PAS | ✅ done | verified in `--mock` mode |
 | Runtime (router / verifier / boundary / lm_server) | 🟢 mostly done | router/verifier/boundary(logprob)/lm_server + run_turn written; not run live |
 | Training stages (sft/eg-opd/rte/boundary/router/distill) | 🟡 stubs | real loss fn + argparsers; GPU loops TODO |
-| Reproduce baseline numbers | ⛔ blocked | needs GPU + model download (see §3) |
+| Reproduce baseline numbers | 🟡 partial | llama.cpp generic server can't drive the model's native format (see §10) |
 | Train Yantra-1B | ⛔ blocked | depends on GPU + baseline repro |
 | Publish (HF private / GH private) | ⛔ not started | creds ready in `credentials.env` |
 
@@ -72,7 +72,32 @@
   prompt via the OpenAI `messages` API; llama.cpp applies the GGUF's embedded
   chat template. Our "baseline PAS" is therefore *our measured baseline on this
   eval*, which is the right reference for a system-vs-system beat (not a
-  verbatim reproduction of the card's numbers).
+   verbatim reproduction of the card's numbers).
+
+### 2026-07-13 (session 4) — baseline serving blocked on native format
+- **FINDING (blocker for the "reproduce baseline" gate):** the baseline
+  `MiniCPM5-1B-Agentic-Tooluse` model was trained for SGLang's `minicpm5`
+  native stack. Served through llama.cpp's generic OpenAI server (chat OR raw
+  `/v1/completions`), it mostly **echoes the tool schema** or emits a *mangled*
+  call (` name="get_forecast"> name="city">Paris` instead of
+  `<function name="...">...`). In-pipeline numbers on a 60-case sample with a
+  tolerant parser: `parseable 0.43, valid_name 0.20, expected_name 0.12,
+  exact_args 0.10, arg_key_overlap 0.31, stopped_cleanly 0.0` — far below the
+  card's claimed ~0.99/0.93/0.65/0.15.
+- **Implication:** faithful reproduction of the card's numbers requires the
+  model's native serving (SGLang + minicpm5), which is NOT available via
+  llama.cpp on the M4. Two viable paths (DECISION NEEDED — see question to user):
+  1. **In-pipeline relative eval (feasible now):** train Yantra (DTSA) and
+     measure BOTH models through our llama.cpp + runtime on the same 300 cases.
+     The claim becomes "Yantra beats the baseline model *served the same way*"
+     — honest and achievable, but absolute baseline numbers are low because
+     llama.cpp can't drive the baseline's native format.
+  2. **True baseline via SGLang/minicpm5:** install SGLang (Metal support on M4
+     uncertain; may not work) to get card-comparable numbers. High risk/time.
+- **Next action:** decide eval path, then begin Stage 1 (DTSA SFT). NOTE
+  `data/convert_toolace_dtsa.py` still uses the old `queries`/`tools`/`answers`
+  format and must be wired to `data/toolace_conversations.extract_example`
+  before Stage 1 can build SFT data.
 
 **Next action (blocked on hardware):** Step 1 baseline reproduction on the MacBook Air M4. See §9 for the machine-time ask.
 
