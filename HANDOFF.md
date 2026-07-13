@@ -195,3 +195,32 @@ Stored in `credentials.env` (gitignored). Loaded at runtime via `python-dotenv` 
 - HuggingFace `eulogik` (private publish)
 
 Never paste these in chat, logs, or model card.
+
+---
+
+## 4. Session 4 — resumable T4 notebook + training-path de-risk (2026-07-13)
+
+**User directive:** Build a resumable Colab T4 notebook (not local training). Every stage saves
+artifacts and auto-skips completed work on rerun (Hit Run-All after crash/timeout). In-pipeline
+relative eval path chosen (train Yantra DTSA, measure BOTH models via llama.cpp + runtime on the
+same 300 cases; claim = "Yantra beats baseline served the same way").
+
+**Deliverable:** `Yantra_T4_pipeline.ipynb` (10 cells, stages 0–7). Resumable markers +
+periodic LoRA checkpoints + GDrive persistence (local fallback). CUDA-guarded training.
+Tested locally on M4: data build (7822/7251/300), baseline eval (PAS 0.246 on 60 cases),
+resume/skip verified.
+
+**Consistency fix (important):** DTSA training now matches the DTSA design — the runtime/router
+binds `<bind tool="…"/>` and the LM learns to emit ONLY `<args>…</args><action_end/>`. Training
+prompts carry the bind; completions are args-only (helpers `bind_prefix`, `dtsa_args_block`,
+`strip_bind`, `parse_args_block` added). This fixes a prior mismatch where training fed the full
+bind+args while eval prepended the bind and expected args-only.
+
+**Training-path de-risk (M4, mlx-lm):** Ran a tiny DTSA LoRA smoke test (30 iters, 300 samples,
+8 LoRA layers) with `mlx_lm.lora … --train`. Loss fell 1.12 → 0.97; adapters saved; train→generate→
+parse pipeline ran end-to-end with no errors. (30 iters is far too little to learn the format —
+model still echoed schema — but it proves the data format trains and the loop is runnable on Colab.)
+
+**Status:** Notebook committed. Next: user runs it on free-tier T4; report Stage-7 summary.
+llama.cpp baseline reproduction of the GGUF card numbers remains a separate issue (needs SGLang
+minicpm5) — in-pipeline relative framing sidesteps it.
