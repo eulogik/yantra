@@ -232,7 +232,7 @@ PAS = mean of 8 sub-metrics:
 | **Base Model** | [openbmb/MiniCPM5-1B](https://huggingface.co/openbmb/MiniCPM5-1B) |
 | **Training** | QLoRA (r=64, α=128, dropout=0.05) |
 | **Quantization** | Q4_K_M (688 MB) |
-| **Context Length** | 4096 tokens |
+| **Context Length** | 131,072 native (eval at 4,096) |
 | **Max Output** | 768 tokens |
 | **Router** | IDF + char-3gram + MiniLM blend (β=0.5), 247/300 |
 | **License** | MIT |
@@ -308,6 +308,8 @@ Contributions welcome — especially router improvements, verifier coverage, and
 ---
 
 ## 📝 Citation
+
+**Paper:** [`paper/main.pdf`](paper/main.pdf) (arXiv submission pending — author names to be finalized).
 
 ```bibtex
 @software{yantra2026,
