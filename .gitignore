@@ -41,8 +41,13 @@ wandb/
 
 # ============ Notebook run artifacts ============
 yantra_run/
+yantra_run_colab/
 _test_*.ipynb
 .ipynb_checkpoints/
+
+# ============ Eval outputs (local only, official numbers live in notebooks/HF) ============
+eval/results/
+*.zip
 
 # ============ Local HF staging (don't push to GitHub) ============
 hf_model_card_README.md

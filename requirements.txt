@@ -1,18 +1,22 @@
-# Core
+# Core (inference + eval, Mac/CPU-safe)
 openai>=1.30
 datasets>=2.18
 sentence-transformers>=2.7
 torch>=2.2
+numpy>=1.24
+huggingface_hub>=0.23
+pyyaml>=6.0
+
+# Training (Colab T4 with CUDA recommended)
+# NOTE: unsloth is CUDA-only and will NOT install on Apple Silicon.
+# Inference, routing, and eval work fine without it.
 transformers>=4.42
 peft>=0.11
 trl>=0.9
-
-# Training (Colab T4 recommended)
-unsloth>=2024.7
+unsloth>=2024.7; sys_platform == "linux"
 
 # Runtime / inference
 llama-cpp-python>=0.2
 
-# Evaluation & tooling
-pyyaml>=6.0
-jsonlines>=4.0
+# Optional: regenerate assets/ figures
+matplotlib>=3.7
