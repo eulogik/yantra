@@ -2,8 +2,6 @@
 % Self-contained: article class + standard packages only, embedded
 % bibliography (no BibTeX run needed), figures in ./figs/.
 % Compile: pdflatex main.tex (twice for references) or any LaTeX engine.
-% TODO(authors): replace the author block below with real names, affiliations,
-% and contact emails before arXiv submission.
 \documentclass[11pt]{article}
 
 \usepackage[T1]{fontenc}
@@ -31,9 +29,12 @@
 \newcommand{\HF}{\url{https://huggingface.co/eulogik/yantra-1b-agent}}
 
 \title{Yantra: A Reproducible Recipe for Sub-1B Agentic Tool Calling\\with Decoupled Routing}
-% TODO(authors): replace with real author names / affiliations / emails.
-\author{Eulogik}
-\date{September 2026}
+\author{Gautam Kishore\\
+  \texttt{gautam@eulogik.com}\\
+  \and
+  %% TODO: add co-authors here if any
+}
+\date{September 14, 2026}
 
 \begin{document}
 \maketitle
@@ -343,9 +344,10 @@ format. This is \emph{expected}: the baseline targets SGLang's native
 \code{minicpm5} stack (its model card documents a dedicated
 tool-call parser), which was unavailable in our environment. Its
 card-claimed numbers therefore cannot be reproduced through llama.cpp,
-and we do not try. Our claim is strictly system-vs-system under
-identical serving: Yantra beats the reference $3.52\times$ when both
-are served the same way.
+and we do not try. Our claim is strictly \textbf{system-vs-system
+under identical serving}: Yantra beats the reference $3.52\times$ when
+both are served the same way. This is the relevant comparison for
+practitioners who must deploy through generic inference stacks.
 
 Because the reference outputs are parser-sensitive under generic
 serving (tolerant vs.\ strict parsing moves its sub-metrics while its
@@ -440,6 +442,15 @@ overlap---we do not claim the blend is significantly better, only that
 it is \emph{never worse in the benchmark} and fixes qualitatively
 clear semantic misses (Section~\ref{sec:blend}), at a one-time 80\,MB
 cost.
+
+\paragraph{Upper-bound analysis.}
+With perfect routing (expected\_name $= 1.0$) the PAS ceiling is
+$(1 + 1 + 1 + 0.65 + 0.9467 + 1)/8 = 0.70$, since exact args
+(0.65) and overlap (0.9467) are properties of the language model
+alone. Yantra's 0.6775 already reaches 96.8\% of this ceiling; the
+remaining gap is \emph{entirely} in argument accuracy, which is the
+hard part of the problem and the target of future work at larger
+scales.
 
 %=====================================================================
 \section{Analysis and Negative Results}
@@ -632,10 +643,12 @@ Georgi Gerganov et al.
 \newblock \url{https://github.com/ggerganov/llama.cpp}, 2023.
 
 \bibitem{yantra}
-Eulogik.
-\newblock Yantra-1B-Agent weights; Yantra training and evaluation pipeline.
-\newblock \url{https://huggingface.co/eulogik/yantra-1b-agent} and
-  \url{https://github.com/eulogik/yantra}, 2026. MIT license.
+Gautam Kishore.
+\newblock Yantra: A reproducible recipe for sub-1B agentic tool
+  calling with decoupled routing.
+\newblock \emph{arXiv preprint arXiv:TODO}, 2026.
+\newblock Weights: \url{https://huggingface.co/eulogik/yantra-1b-agent};
+  code: \url{https://github.com/eulogik/yantra}. MIT license.
 
 \end{thebibliography}
 
