@@ -1,0 +1,3 @@
+# Exclude Colab runbooks from the language graph so the repo
+# is classified by its Python codebase, not notebook JSON.
+*.ipynb linguist-vendored
