@@ -3,12 +3,16 @@ openai>=1.30
 datasets>=2.18
 sentence-transformers>=2.7
 torch>=2.2
+transformers>=4.42
+peft>=0.11
+trl>=0.9
 
-# Training (install what you have GPU for)
-# unsloth>=2024.7
-# trl>=0.9
-# peft>=0.11
-# transformers>=4.42
+# Training (Colab T4 recommended)
+unsloth>=2024.7
 
-# Optional runtime
-# llama-cpp-python>=0.2
+# Runtime / inference
+llama-cpp-python>=0.2
+
+# Evaluation & tooling
+pyyaml>=6.0
+jsonlines>=4.0

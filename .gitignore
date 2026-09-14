@@ -12,7 +12,6 @@ secrets*
 *.pt
 *.onnx
 models/
-nanogent/models/
 **/checkpoints/
 **/merged/
 **/adapters/
@@ -44,3 +43,7 @@ wandb/
 yantra_run/
 _test_*.ipynb
 .ipynb_checkpoints/
+
+# ============ Local HF staging (don't push to GitHub) ============
+hf_model_card_README.md
+hf_config.json
