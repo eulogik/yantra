@@ -27,12 +27,14 @@
 \newcommand{\code}[1]{\texttt{#1}}
 
 \title{Yantra: A Reproducible Recipe for Sub-1B Agentic Tool Calling\\with Decoupled Routing}
-\author{Gautam Kishore\\
-  \texttt{gautam@eulogik.com}\\
-  \and
-  %% TODO: add co-authors here if any
+
+\author{%
+  {\Large\bfseries Gautam Kishore\enspace Eulogik}\\[4pt]
+  {\normalsize https://eulogik.com}\\[2pt]
+  {\normalsize github.com/eulogik\enspace$\cdot$\enspace huggingface.co/eulogik}
 }
-\date{September 14, 2026}
+
+\date{September 16, 2026}
 
 \begin{document}
 \maketitle
@@ -57,6 +59,8 @@ argument quality, while supervised replay on the same fixes recovers safely.
 Scope is deliberately narrow (single-call, English, $n=300$); we state every
 threat to validity inline so the work can be built on without surprises.
 \end{abstract}
+
+\noindent\textbf{Keywords:} tool calling, small language models, QLoRA, DTSA, decoupled routing, agentic AI, MiniCPM, reproducibility
 
 \noindent\textbf{Artifacts:}\quad
 Code: \url{https://github.com/eulogik/yantra}\quad
