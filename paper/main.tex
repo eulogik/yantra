@@ -1,4 +1,4 @@
-% Yantra — arXiv preprint source.
+% Yantra -- arXiv preprint source.
 % Self-contained: article class + standard packages only, embedded
 % bibliography (no BibTeX run needed), figures in ./figs/.
 % Compile: pdflatex main.tex (twice for references) or any LaTeX engine.
@@ -58,8 +58,9 @@ Scope is deliberately narrow (single-call, English, $n=300$); we state every
 threat to validity inline so the work can be built on without surprises.
 \end{abstract}
 
-\noindent\textbf{Artifacts:} code \url{https://github.com/eulogik/yantra} \quad
-weights \url{https://huggingface.co/eulogik/yantra-1b-agent}\par
+\noindent\textbf{Artifacts:}\quad
+Code: \url{https://github.com/eulogik/yantra}\quad
+Weights: \url{https://huggingface.co/eulogik/yantra-1b-agent}\quad
 License: MIT (code and Yantra weights; base model Apache-2.0).
 
 %=====================================================================
@@ -151,10 +152,12 @@ context, Apache-2.0) from the MiniCPM family, whose training methodology
 (wind-tunnel scaling, WSD scheduling) targets strong SLMs~\cite{minicpm}.
 Notably, its own post-training uses RL plus on-policy distillation, and its
 card documents native XML-style tool calling served via SGLang -- a fact central
-to our baseline discussion in Section~\ref{sec:baseline}. We fine-tune with
-QLoRA~\cite{qlora} ($r{=}64$, $\alpha{=}128$) and use Direct Preference
-Optimization~\cite{dpo} in one stage; Section~\ref{sec:negatives} contributes a
-cautionary datapoint on DPO with tiny contrastive sets.
+to our baseline discussion in Section~\ref{sec:baseline}. Recent work on
+sub-1B models~\cite{picotype} and frozen-base correction~\cite{crenv2} shows
+the space is moving fast. We fine-tune with QLoRA~\cite{qlora} ($r{=}64$,
+$\alpha{=}128$) and use Direct Preference Optimization~\cite{dpo} in one stage;
+Section~\ref{sec:negatives} contributes a cautionary datapoint on DPO with tiny
+contrastive sets.
 
 %=====================================================================
 \section{Method}
@@ -416,11 +419,11 @@ in the benchmark} and fixes qualitatively clear semantic misses
 
 \paragraph{Upper-bound analysis.}
 With perfect routing (expected\_name $= 1.0$) the PAS ceiling is
-$(1 + 1 + 1 + 0.65 + 0.9467 + 1)/8 = 0.70$, since exact args (0.65) and
-overlap (0.9467) are properties of the language model alone. Yantra's 0.6775
-already reaches 96.8\% of this ceiling; the remaining gap is \emph{entirely}
-in argument accuracy, which is the hard part of the problem and the target of
-future work at larger scales.
+$(1 + 1 + 1 + 0.65 + 0.9467 + 1)/8 = 0.70$. The exact-args (0.65) and overlap
+(0.9467) scores are properties of the language model alone -- routing can't
+improve them. Yantra's 0.6775 already reaches 96.8\% of this ceiling; the
+remaining gap is entirely in argument accuracy, which is the hard part of the
+problem and the target of future work at larger scales.
 
 %=====================================================================
 \section{Analysis and Negative Results}
@@ -444,12 +447,11 @@ After mining 66 argument failures, we ran DPO for 3 epochs at $5{\times}10^{-5}$
 on 66 contrastive pairs. The run collapsed: \code{exact\_args} fell 0.65 $\to$
 0.14 (PAS 0.5124) as the policy learned to emit a single blob parameter keyed
 by the tool name instead of per-key \code{<param>} elements. Sixty-six pairs are
-evidently too few for contrastive updates of this size at that step budget --
-the preference gradient rewards the degenerate shortcut that is closest in KL to
-the reference on tiny data. We discarded all artifacts from this round (no
-checkpoint ships) and report it so others skip the configuration: \emph{do not
-run few-shot DPO on structured-output models without first checking emission
-validity}.
+evidently too few for contrastive updates at this step budget -- the preference
+gradient rewards the degenerate shortcut closest in KL to the reference on tiny
+data. We discarded all artifacts from this round (no checkpoint ships) and
+report it so others skip this configuration: \emph{do not run few-shot DPO on
+structured-output models without first checking emission validity}.
 
 \subsection{Supervised replay recovers safely}
 \label{sec:replay}
@@ -466,20 +468,22 @@ blend. Each gain is small; their sum is the system.
 \label{sec:limits}
 
 We state these plainly so the work is judged on what it is: a 1\,B-scale,
-single-benchmark systems recipe. (i) Single eval slice ($n{=}300$), single
-seed, greedy decoding: we report Wilson intervals for accuracies but no
-multi-seed variance, and no confidence interval for PAS itself (per-case scores
-for the official run live with the run artifacts, not the repo). (ii)
-Single-call English only; recovery and multiturn PAS components are 0 by
-construction -- the headline 0.6775 already prices this in. (iii) No
-external-benchmark validation: BFCL and APIBank are future work, and
-cross-benchmark comparisons would be invalid without a format port. (iv)
-Baseline asymmetry (Section~\ref{sec:baseline}): the reference is strong under
-its native stack; our $3.52\times$ holds under identical generic serving only.
-A SGLang-native rematch is the obvious follow-up. (v) 65\% exact args means one
-call in three has a wrong value: schema validation before execution is
-mandatory, and high-stakes tool use (payments, medical, infrastructure) is out
-of scope. (vi) The recipe is demonstrated at 1\,B; the 7\,B scaling claim is a
+single-benchmark systems recipe.
+(i) Single eval slice ($n{=}300$), single seed, greedy decoding: we report
+Wilson intervals for accuracies but no multi-seed variance, and no confidence
+interval for PAS itself (per-case scores for the official run live with the run
+artifacts, not the repo).
+(ii) Single-call English only; recovery and multiturn PAS components are 0 by
+construction -- the headline 0.6775 already prices this in.
+(iii) No external-benchmark validation: BFCL and APIBank are future work, and
+cross-benchmark comparisons would be invalid without a format port.
+(iv) Baseline asymmetry (Section~\ref{sec:baseline}): the reference is strong
+under its native stack; our $3.52\times$ holds under identical generic serving
+only. A SGLang-native rematch is the obvious follow-up.
+(v) 65\% exact args means one call in three has a wrong value: schema
+validation before execution is mandatory, and high-stakes tool use (payments,
+medical, infrastructure) is out of scope.
+(vi) The recipe is demonstrated at 1\,B; the 7\,B scaling claim is a
 hypothesis, not a result.
 
 %=====================================================================
@@ -604,6 +608,17 @@ Unsloth AI.
 Georgi Gerganov et al.
 \newblock llama.cpp: LLM inference in C/C++.
 \newblock \url{https://github.com/ggerganov/llama.cpp}, 2023.
+
+\bibitem{picotype}
+Gautam Kishore.
+\newblock pico-type: A 1.5M-Parameter Byte-Level Multi-Head Content Classifier.
+\newblock \emph{arXiv preprint arXiv:2608.14658}, 2026.
+
+\bibitem{crenv2}
+Gautam Kishore.
+\newblock Safe Error Correction for Language Models: Frozen-Base Adjustment with
+  Capability Preservation.
+\newblock \emph{arXiv preprint arXiv:2609.16145}, 2026.
 
 \bibitem{yantra}
 Gautam Kishore.
